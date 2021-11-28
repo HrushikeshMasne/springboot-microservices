@@ -1,0 +1,59 @@
+    
+server:
+  port: 9191
+  
+#Adding below configurations in boostrap.yml to fetch config from server.  
+##eureka client configurations
+#eureka:
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    service-url:
+#      defaultZone: http://localhost:8761/eureka   
+#  instance:
+#    hostname: localhost  
+    
+#api-gateway configurations
+#other services aata port 9191 ne call kru shaku aapn| http://localhost:9191/users/1 | internally users or dept service call jail api-gateway through
+spring:
+  application:
+    name: spring-cloud-api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: lb://user-service      #lb- loadbalancer @loadBalanced val
+          predicates:
+           - Path=/users/**           #anything or any request comes on /users/* path will be redirect on "uri" i.e lb://user-service (user-service kde redirect krel)
+          filters:
+           - name: CircuitBreaker     #Hystrix | Adding filters to call the fallback method in FallBackMethodController
+             args:
+              name : user-service
+              fallbackuri: forward:/callUserFallbackMethod    #this fallback service will be called to show alerts if user service failed
+              
+        - id: department-service
+          uri: lb://department-service
+          predicates:
+           - Path=/departments/**     #anything comes on /users/* path will be redirect on "uri"
+          filters:
+           - name: CircuitBreaker     #Hystrix | Adding filters to call the fallback method in FallBackMethodController
+             args:
+              name : department-service
+              fallbackuri: forward:/callDepartmentFallbackMethod    #this fallback service will be called to show alerts if user service failed
+           
+#Hystrix configurations
+#hystrix: 
+  command: 
+    default: 
+      execution: 
+        isolation: 
+          thread: 
+            timeoutInMilliseconds: 4000  #If user/dept service didn't respond in 4 seconds, then fallbackcmd fallbackMethod call krel
+
+
+#Actuator configurations for hystrix endpoint
+management:
+  endpoints:
+    web:
+      exposure:
+        include: hystrix.stream     #health, session ashe different provide kru shakto  | * for all

@@ -1,0 +1,14 @@
+server:
+  port: 9296
+
+spring:
+  application:
+    name: config-server
+  
+  cloud:
+    config:
+      server:
+        git: 
+          uri: https://github.com/HrushikeshMasne/microsserv-config-server-properties
+          default-label: main
+          clone-on-start: true 

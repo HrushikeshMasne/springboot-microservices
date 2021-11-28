@@ -1,0 +1,6 @@
+#Eureka configuratiosn will be retrievd from https://github.com/HrushikeshMasne/microsserv-config-server-properties using config-server
+spring:
+  cloud:
+    config:
+      enabled: true       #enabling the config-servr here, it will load github eureka configuration directly
+      uri: http://localhost:9296
